@@ -1,8 +1,8 @@
 package com.company.primenumbers.domain;
 
 import com.company.primenumbers.repo.PrimeNumberRepo;
-import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +22,11 @@ public class MaxRequestedNumber {
             atomicLong = new AtomicLong();
     }
 
-    @Nullable
     public Long get() {
         return atomicLong.get();
     }
 
-    public void update(Long value) {
+    public void update(@NonNull Long value) {
         if (value > get())
             atomicLong.set(value);
     }
