@@ -13,7 +13,7 @@ import org.springframework.lang.Nullable;
 public class StatusResponse {
     @JsonProperty(value = "status")
     @NonNull
-    String status;
+    Status status;
 
     @JsonProperty(value = "prime-number")
     @Nullable

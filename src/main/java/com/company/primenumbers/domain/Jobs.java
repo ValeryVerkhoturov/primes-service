@@ -26,6 +26,10 @@ public class Jobs {
         return uuid;
     }
 
+    public boolean containsJob(UUID uuid) {
+        return jobs.containsKey(uuid);
+    }
+
     @Nullable
     public PrimeNumber getResult(UUID uuid) throws ExecutionException, InterruptedException {
         Future<PrimeNumber> future = jobs.get(uuid);

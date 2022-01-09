@@ -37,11 +37,13 @@ public class PrimeNumbersController {
 
     @GetMapping(value = "/result/{job-id}")
     public StatusResponse statusResponse(@PathVariable("job-id") UUID uuid) throws ExecutionException, InterruptedException {
-        PrimeNumber primeNumber = jobs.getResult(uuid);
+        if (!jobs.containsJob(uuid))
+            return new StatusResponse(Status.notExists);
 
+        PrimeNumber primeNumber = jobs.getResult(uuid);
         if (primeNumber == null)
-            return new StatusResponse(Status.pending.name());
+            return new StatusResponse(Status.pending);
         else
-            return new StatusResponse(Status.ready.name(), primeNumber.getNumber());
+            return new StatusResponse(Status.ready, primeNumber.getNumber());
     }
 }

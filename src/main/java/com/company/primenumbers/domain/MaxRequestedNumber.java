@@ -3,7 +3,6 @@ package com.company.primenumbers.domain;
 import com.company.primenumbers.repo.PrimeNumberRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicLong;
