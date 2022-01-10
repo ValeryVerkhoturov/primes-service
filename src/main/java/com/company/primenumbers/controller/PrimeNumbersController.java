@@ -22,8 +22,8 @@ public class PrimeNumbersController {
     Jobs jobs;
 
     @GetMapping(value = "/{number}")
-    public BaseResponse baseResponse(@PathVariable Long number) {
-        PrimeNumber primeNumber = primeUtils.maxEqualOrBelowPrime(number).orElse(null);
+    public BaseResponse baseResponse(@PathVariable Long number) throws ExecutionException, InterruptedException {
+        PrimeNumber primeNumber = primeUtils.maxEqualOrBelowPrime(number).get().orElse(null);
 
         if (primeNumber != null)
             return new BaseResponse(number, primeNumber.getNumber());

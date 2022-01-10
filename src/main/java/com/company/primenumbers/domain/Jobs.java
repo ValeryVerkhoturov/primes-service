@@ -6,23 +6,24 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Jobs {
 
-    ExecutorService executorService = Executors.newCachedThreadPool();
-
-    ConcurrentHashMap<UUID, Future<PrimeNumber>> jobs = new ConcurrentHashMap<>();
+    ConcurrentHashMap<UUID, Future<Optional<PrimeNumber>>> jobs = new ConcurrentHashMap<>();
 
     PrimeUtils primeUtils;
 
     public UUID addJob(Long requested) {
         UUID uuid = UUID.randomUUID();
-        jobs.put(uuid, executorService.submit(() -> primeUtils.maxEqualOrBelowPrime(requested).orElse(null)));
+        jobs.put(uuid, primeUtils.maxEqualOrBelowPrime(requested));
         return uuid;
     }
 
@@ -32,9 +33,9 @@ public class Jobs {
 
     @Nullable
     public PrimeNumber getResult(UUID uuid) throws ExecutionException, InterruptedException {
-        Future<PrimeNumber> future = jobs.get(uuid);
+        Future<Optional<PrimeNumber>> future = jobs.get(uuid);
         if (future != null && future.isDone())
-            return future.get();
+            return future.get().orElse(null);
 
         return null;
     }

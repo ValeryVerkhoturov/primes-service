@@ -6,13 +6,18 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 @Component
+@EnableAsync
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PrimeUtils {
@@ -23,13 +28,14 @@ public class PrimeUtils {
 
     MaxRequestedNumber maxRequestedNumber;
 
-    public Optional<PrimeNumber> maxEqualOrBelowPrime(@NonNull Long request) {
+    @Async
+    public Future<Optional<PrimeNumber>> maxEqualOrBelowPrime(@NonNull Long request) {
         if (MIN_PRIME_VALUE > request)
-            return Optional.empty();
+            return new AsyncResult<>(Optional.empty());
 
         Long maxRequested = maxRequestedNumber.get();
         if (Objects.nonNull(maxRequested) && maxRequested >= request)
-            return Optional.of(new PrimeNumber(primeNumberRepo.maxPrimeBelow(request)));
+            return new AsyncResult<>(Optional.of(new PrimeNumber(primeNumberRepo.maxPrimeBelow(request))));
 
         List<PrimeNumber> primesToInsert = primesBetween(maxRequested, request);
 
@@ -43,7 +49,7 @@ public class PrimeUtils {
             maxRequestedNumber.update(request);
         }
 
-        return primesToInsert.stream().max(Comparator.comparing(PrimeNumber::getNumber));
+        return new AsyncResult<>(primesToInsert.stream().max(Comparator.comparing(PrimeNumber::getNumber)));
     }
 
     /**

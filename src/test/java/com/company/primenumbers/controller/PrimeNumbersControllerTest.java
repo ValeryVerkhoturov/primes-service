@@ -1,6 +1,5 @@
 package com.company.primenumbers.controller;
 
-import com.company.primenumbers.domain.Jobs;
 import com.company.primenumbers.domain.Status;
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.text.MatchesPattern;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -17,28 +16,26 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PrimeNumbersControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
-
-    @Autowired
-    private Jobs jobs;
-
     @Test
     public void returnBaseRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/12"))
+        long requestedNumber = 12L;
+        long expectedResultPrime = 11L;
+        mockMvc.perform(MockMvcRequestBuilders.get("/" + requestedNumber))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpectAll(MockMvcResultMatchers.jsonPath("$.requested-x").value(12),
-                        MockMvcResultMatchers.jsonPath("$.prime-number").value(11));
+                .andExpectAll(MockMvcResultMatchers.jsonPath("$.requested-x").value(requestedNumber),
+                        MockMvcResultMatchers.jsonPath("$.prime-number").value(expectedResultPrime));
     }
 
     @Test
@@ -52,8 +49,8 @@ public class PrimeNumbersControllerTest {
 
     @Test
     public void returnPendingResponse() throws Exception {
-        long requestedNumber = 12L;
-        long expectedResultPrime = 11L;
+        long requestedNumber = 500L;
+        long expectedResultPrime = 499L;
         MvcResult postResoult = mockMvc.perform(MockMvcRequestBuilders.post("/" + requestedNumber))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
@@ -66,12 +63,13 @@ public class PrimeNumbersControllerTest {
                 .andExpectAll(MockMvcResultMatchers.jsonPath("$.status").value(Status.pending.name()),
                         MockMvcResultMatchers.jsonPath("$.prime-number").doesNotExist());
 
-        // TODO
-//        mockMvc.perform(MockMvcRequestBuilders.get("/result/" + uuid))
-//                .andDo(MockMvcResultHandlers.print())
-//                .andExpect(MockMvcResultMatchers.status().isOk())
-//                .andExpectAll(MockMvcResultMatchers.jsonPath("$.status").value(Status.ready.name()),
-//                        MockMvcResultMatchers.jsonPath("$.prime-number").value(expectedResultPrime));
+        TimeUnit.SECONDS.sleep(20);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/result/" + uuid))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpectAll(MockMvcResultMatchers.jsonPath("$.status").value(Status.ready.name()),
+                        MockMvcResultMatchers.jsonPath("$.prime-number").value(expectedResultPrime));
     }
 
     @Test
