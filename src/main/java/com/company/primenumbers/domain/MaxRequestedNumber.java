@@ -4,10 +4,11 @@ import com.company.primenumbers.repo.PrimeNumberRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-@Component
+@Service
 public class MaxRequestedNumber {
 
     private final AtomicLong atomicLong;
